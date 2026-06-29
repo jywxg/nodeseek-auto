@@ -1,102 +1,88 @@
 name: nodeseek鸡腿签到
 
 on:
-push:
-branches:
-- main
-schedule:
-- cron: '35 23 * * *'  # 北京时间 10:31 (UTC+8)，对应UTC时间 18:31
-workflow_dispatch:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '35 23 * * *'  # 北京时间 10:31 (UTC+8)，对应UTC时间 18:31
+  workflow_dispatch:
 
 permissions:
-contents: write
-actions: write  # 添加写入Actions变量的权限
+  contents: write
+  actions: write  # 添加写入Actions变量的权限
 
 jobs:
-run-nodeseek-sign:
-runs-on: ubuntu-latest
+  run-nodeseek-sign:
+    runs-on: ubuntu-latest
 
-```
-steps:
-  - name: 检出代码仓库
-    uses: actions/checkout@v3
-  
-  - name: 配置Python环境
-    uses: actions/setup-python@v2
-    with:
-      python-version: '3.11.8'
+    steps:
+      - name: 检出代码仓库
+        uses: actions/checkout@v3
 
-  - name: 安装依赖包
-    run: |
-      pip install curl_cffi requests
+      - name: 配置Python环境
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11.8'
 
-  - name: 运行签到脚本
-    env:
-      # 基本账号
-      USER: ${{ secrets.USER }}
-      PASS: ${{ secrets.PASS }}
-      
-      # 额外账号1-5
-      USER1: ${{ secrets.USER1 }}
-      PASS1: ${{ secrets.PASS1 }}
-      USER2: ${{ secrets.USER2 }}
-      PASS2: ${{ secrets.PASS2 }}
-      USER3: ${{ secrets.USER3 }}
-      PASS3: ${{ secrets.PASS3 }}
-      USER4: ${{ secrets.USER4 }}
-      PASS4: ${{ secrets.PASS4 }}
-      USER5: ${{ secrets.USER5 }}
-      PASS5: ${{ secrets.PASS5 }}
-      
-      # Cookie配置
-      NS_COOKIE: ${{ secrets.NS_COOKIE }}
-      
-      # 验证码配置
-      SOLVER_TYPE: ${{ secrets.SOLVER_TYPE }}
-      API_BASE_URL: ${{ secrets.API_BASE_URL }}
-      CLIENTT_KEY: ${{ secrets.CLIENTT_KEY }}
-      
-      # GitHub API配置
-      GH_PAT: ${{ secrets.GH_PAT }}
-      GITHUB_REPOSITORY: ${{ github.repository }}
-      
-      # 通知推送配置
-      TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
-      TG_USER_ID: ${{ secrets.TG_USER_ID }}
-      TG_THREAD_ID: ${{ secrets.TG_THREAD_ID }}
-    run: python nodeseek_sign.py
+      - name: 安装依赖包
+        run: |
+          pip install curl_cffi requests
 
-  # ⏱️ 提交 time.txt 到仓库(用于解决60天无文件变化的限制)
-  - name: 更新运行记录
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    run: |
-      git config user.name "github-actions[bot]"
-      git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: 运行签到脚本
+        env:
+          USER: ${{ secrets.USER }}
+          PASS: ${{ secrets.PASS }}
+          USER1: ${{ secrets.USER1 }}
+          PASS1: ${{ secrets.PASS1 }}
+          USER2: ${{ secrets.USER2 }}
+          PASS2: ${{ secrets.PASS2 }}
+          USER3: ${{ secrets.USER3 }}
+          PASS3: ${{ secrets.PASS3 }}
+          USER4: ${{ secrets.USER4 }}
+          PASS4: ${{ secrets.PASS4 }}
+          USER5: ${{ secrets.USER5 }}
+          PASS5: ${{ secrets.PASS5 }}
+          NS_COOKIE: ${{ secrets.NS_COOKIE }}
+          SOLVER_TYPE: ${{ secrets.SOLVER_TYPE }}
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          CLIENTT_KEY: ${{ secrets.CLIENTT_KEY }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_USER_ID: ${{ secrets.TG_USER_ID }}
+          TG_THREAD_ID: ${{ secrets.TG_THREAD_ID }}
+        run: python nodeseek_sign.py
 
-      if [ ! -f time.txt ]; then
-        echo "首次生成时间：$(date +'%Y-%m-%d %H:%M:%S')" > time.txt
-      else
-        echo "$(date +'%Y-%m-%d %H:%M:%S')" > time.txt
-      fi
+      - name: 更新运行记录
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      git add time.txt
+          if [ ! -f time.txt ]; then
+            echo "首次生成时间：$(date +'%Y-%m-%d %H:%M:%S')" > time.txt
+          else
+            echo "$(date +'%Y-%m-%d %H:%M:%S')" > time.txt
+          fi
 
-      if git diff --cached --quiet; then
-        echo "无变化，无需提交"
-      else
-        git commit -m "⏱️ 更新时间文件: $(date +'%Y-%m-%d %H:%M:%S')"
-        git pull --rebase origin main
-        git push origin HEAD:main
-      fi
+          git add time.txt
 
-  - name: 清理旧运行
-    if: always()
-    uses: Mattraks/delete-workflow-runs@v2
-    with:
-      token: ${{ github.token }}
-      repository: ${{ github.repository }}
-      delete_workflow_pattern: nodeseek鸡腿签到
-      retain_days: 0
-      keep_minimum_runs: 3
-```
+          if git diff --cached --quiet; then
+            echo "无变化，无需提交"
+          else
+            git commit -m "⏱️ 更新时间文件: $(date +'%Y-%m-%d %H:%M:%S')"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
+      - name: 清理旧运行
+        if: always()
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          delete_workflow_pattern: nodeseek鸡腿签到
+          retain_days: 0
+          keep_minimum_runs: 3
