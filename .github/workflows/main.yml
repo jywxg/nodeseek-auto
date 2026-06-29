@@ -1,3 +1,4 @@
+```yaml
 name: nodeseek鸡腿签到
 
 on:
@@ -65,7 +66,8 @@ jobs:
           TG_THREAD_ID: ${{ secrets.TG_THREAD_ID }}
         run: python nodeseek_sign.py
 
-      - name: Commit time.txt to repo
+      # ⏱️ 提交 time.txt 到仓库(用于解决60天无文件变化的限制)
+      - name: 更新运行记录
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -84,7 +86,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "无变化，无需提交"
           else
-            git commit -m "⏱️ 更新时间文件: $(TZ=Asia/Shanghai date +'%Y-%m-%d %H:%M:%S')"
+            git commit -m "⏱️ 更新时间文件: $(TZ=Asia/Shanghai date +'%Y-%m-%d %H:%M:%S') [skip ci]"
             git pull --rebase origin main
             git push origin HEAD:main
           fi
