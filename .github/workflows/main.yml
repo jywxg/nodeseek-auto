@@ -20,7 +20,7 @@ runs-on: ubuntu-latest
 steps:
   - name: 检出代码仓库
     uses: actions/checkout@v3
-
+  
   - name: 配置Python环境
     uses: actions/setup-python@v2
     with:
@@ -35,7 +35,7 @@ steps:
       # 基本账号
       USER: ${{ secrets.USER }}
       PASS: ${{ secrets.PASS }}
-
+      
       # 额外账号1-5
       USER1: ${{ secrets.USER1 }}
       PASS1: ${{ secrets.PASS1 }}
@@ -47,19 +47,19 @@ steps:
       PASS4: ${{ secrets.PASS4 }}
       USER5: ${{ secrets.USER5 }}
       PASS5: ${{ secrets.PASS5 }}
-
+      
       # Cookie配置
-      NS_COOKIE: ${{ vars.NS_COOKIE || secrets.NS_COOKIE }}
-
+      NS_COOKIE: ${{ secrets.NS_COOKIE }}
+      
       # 验证码配置
       SOLVER_TYPE: ${{ secrets.SOLVER_TYPE }}
       API_BASE_URL: ${{ secrets.API_BASE_URL }}
       CLIENTT_KEY: ${{ secrets.CLIENTT_KEY }}
-
+      
       # GitHub API配置
       GH_PAT: ${{ secrets.GH_PAT }}
       GITHUB_REPOSITORY: ${{ github.repository }}
-
+      
       # 通知推送配置
       TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
       TG_USER_ID: ${{ secrets.TG_USER_ID }}
@@ -91,11 +91,12 @@ steps:
       fi
 
   - name: 清理旧运行
+    if: always()
     uses: Mattraks/delete-workflow-runs@v2
     with:
       token: ${{ github.token }}
       repository: ${{ github.repository }}
-      delete_workflow_pattern: ${{ github.workflow }}
+      delete_workflow_pattern: nodeseek鸡腿签到
       retain_days: 0
       keep_minimum_runs: 3
 ```
